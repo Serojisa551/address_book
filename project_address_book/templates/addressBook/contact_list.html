@@ -1,0 +1,11 @@
+{% extends 'addressBook/base.html' %}
+
+{% block content %}
+<h2>Contact List</h2>
+<ul>
+    {% for contact in contacts %}
+    <li>{{ contact.name }} {{ contact.pk }}</li>
+    {% endfor %}
+    <a href="http://127.0.0.1:8000/register/">register</a><br>
+</ul>
+{% endblock %}
