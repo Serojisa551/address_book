@@ -4,7 +4,7 @@
 <h2>Contact List</h2>
 <ul>
     {% for contact in contacts %}
-    <li> <a href=" contact/{{ contact.pk }}/details/">{{ contact.name }}</a> </li>
+    <li> <a href=" contact/{{ contact.pk }}/details/">{{ contact.name }}</a> {{ contact.pk }}</li>
     {% endfor %}
     <a href="{% url 'register_contact' %}">register</a><br>
 </ul>
