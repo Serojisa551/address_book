@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-
+from django.http import HttpResponse
+from django.template import loader
 from .forms import ContactForm
 from .models import Contact
 
@@ -35,3 +36,15 @@ def delete_contact(request, pk):
         return redirect('contact_list')
     return render(request, 'addressbook/contact_delete.html', {'contact': contact})
 
+
+def details_contact(request, pk):
+    """
+    Displays the details of a specific contact based on the provided primary key (pk).
+    Retrieves the contact from the database and renders the contact details template.
+    """
+    contact = Contact.objects.get(pk=pk)
+    template = loader.get_template("addressbook/contact_details.html")
+    context = {
+        "contact": contact,
+    }
+    return HttpResponse(template.render(context, request))

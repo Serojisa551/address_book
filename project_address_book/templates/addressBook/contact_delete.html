@@ -8,12 +8,5 @@
     <button type="submit">Delete</button>
     <a href="{% url 'contact_list' %}">Cancel</a>
 </form>
-<ul>
-    {% for contact in contacts %}
-    <li>
-        {{ contact.name }} - {{ contact.phone_number }}
-    </li>
-    {% endfor %}
-</ul>
 
 {% endblock %}
