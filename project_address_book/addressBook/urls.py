@@ -7,4 +7,5 @@ urlpatterns = [
     path('contact/<int:pk>/delete/', delete_contact, name='delete_contact'),
     path('contact/<int:pk>/details/', details_contact , name='details_contact'),
     path('contact/<int:pk>/update/', update_contact, name='update_contact'),
+    path('contact/<query>/search/', contact_search, name='search_contact'),
 ]

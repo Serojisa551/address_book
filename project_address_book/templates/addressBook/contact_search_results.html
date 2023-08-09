@@ -1,0 +1,14 @@
+{% extends 'addressBook/base.html' %}
+
+{% block content %}
+<h3>Contact Search Results for "{{ query }}"</h3>
+    <ul>
+        {% for contact in contacts %}
+            <li> <a href="/contact/{{ contact.pk }}/details/">{{ contact.name }}</a></li>
+        {% empty %}
+            <p>No matching contacts found.</p>
+        {% endfor %}
+    </ul>
+    <br>
+    <a href="{% url 'contact_list' %}">Back to Contact List</a>
+{% endblock %}

@@ -4,6 +4,7 @@ from django.template import loader
 from .forms import ContactForm
 from .models import Contact
 
+
 def register_contact(request):
     """
     Handles requests to register new contacts.
@@ -66,3 +67,21 @@ def update_contact(request, pk):
     else:
         form = ContactForm(instance=contact)
     return render(request, 'addressbook/contact_update.html', {'form': form})
+
+def contact_search(request, query):
+    """
+    Handles requests to search for contacts based on user-specified criteria.
+    Retrieves contacts from the database that match the search criteria,
+    such as name, phone number, email address, or notes.
+    Displays a list of matching contacts  if no results are found.
+    # """
+    contacts_db = Contact.objects.all()
+    langht = len(contacts_db)
+    contacts = []
+    for index in range(0, langht):
+        elm = contacts_db[index]
+        if elm.name == query or elm.phone_number == query or elm.email == query or elm.notes == query:
+            contacts.append(elm)
+
+
+    return render(request, 'addressbook/contact_search_results.html', {'contacts': contacts, 'query': query})
