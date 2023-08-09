@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+
 from .forms import ContactForm
 from .models import Contact
 
@@ -22,4 +23,15 @@ def contact_list(request):
     """
     contacts = Contact.objects.all()
     return render(request, 'addressbook/contact_list.html', {'contacts': contacts})
+
+def delete_contact(request, pk):
+    """
+    Deletes a contact based on the provided pk if the request is made using the POST method,
+    otherwise displays a confirmation page for contact deletion.
+    """
+    contact = get_object_or_404(Contact, pk=pk)
+    if request.method == 'POST':
+        contact.delete()
+        return redirect('contact_list')
+    return render(request, 'addressbook/contact_delete.html', {'contact': contact})
 
