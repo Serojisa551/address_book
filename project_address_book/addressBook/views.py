@@ -6,6 +6,7 @@ from .models import Contact
 from django.core.serializers import serialize
 import json
 from django.http import JsonResponse
+from django.db.utils import IntegrityError
 
 
 def register_contact(request):
@@ -75,5 +76,32 @@ def save_address_book(request):
         with open(file_path, 'w') as file:
             file.write(json_data)
 
-    return render(request, 'addressBook/address_book_backup.html')
+    return render(request, 'addressBook/backup_address_book.html')
 
+def import_address_book(request):
+    """
+    Handles the process of importing contact data from a JSON file into the database.
+    Reads the JSON file, parses the data, and creates Contact objects in the database.
+    """
+    if request.method == 'POST':
+        file_name = request.POST.get('file_name')
+        file_path = f'data/{file_name}'
+
+        try:
+            with open(file_path, 'r') as file:
+                json_data = json.load(file)
+                for item in json_data:
+                    contact_data = {
+                        'name': item['fields']['name'],
+                        'phone_number': item['fields']['phone_number'],
+                        'email': item['fields']['email'],
+                        'notes': item['fields']['notes']
+                    }
+                    try:
+                        Contact.objects.create(**contact_data)
+                    except IntegrityError:
+                        pass
+        except FileNotFoundError:
+            pass
+
+    return render(request, 'addressBook/import_address_book.html')

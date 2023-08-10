@@ -1,0 +1,13 @@
+{% extends 'addressBook/base.html' %}
+
+{% block content %}
+<h3>Attach the file to import the address book backup</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="id_file_name">JSON File:</label>
+        <input type="file" name="file_name" accept=".json">
+        <button type="submit">Import</button>
+    </form>
+<a href="{% url 'contact_list' %}">Back to Contact List</a>
+
+{% endblock %}
