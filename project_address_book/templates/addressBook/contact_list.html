@@ -6,6 +6,7 @@
     {% for contact in contacts %}
     <li> <a href=" contact/{{ contact.pk }}/details/">{{ contact.name }}</a> </li>
     {% endfor %}
-    <a href="{% url 'register_contact' %}">register</a><br>
+    <a href="{% url 'save_address_book' %}">backup</a><br>
+    <a href="{% url 'register_contact' %}">register</a>
 </ul>
 {% endblock %}

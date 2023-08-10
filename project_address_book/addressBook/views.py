@@ -3,6 +3,10 @@ from django.http import HttpResponse
 from django.template import loader
 from .forms import ContactForm
 from .models import Contact
+from django.core.serializers import serialize
+import json
+from django.http import JsonResponse
+
 
 def register_contact(request):
     """
@@ -36,7 +40,6 @@ def delete_contact(request, pk):
         return redirect('contact_list')
     return render(request, 'addressbook/contact_delete.html', {'contact': contact})
 
-
 def details_contact(request, pk):
     """
     Displays the details of a specific contact based on the provided primary key (pk).
@@ -48,3 +51,29 @@ def details_contact(request, pk):
         "contact": contact,
     }
     return HttpResponse(template.render(context, request))
+
+def save_address_book(request):
+    """
+    Handles the process of saving the address book data to a JSON file.
+    Retrieves contact data from the database, serializes it to JSON format,
+    and saves it to a user-specified or default file in the 'data' directory.
+    If no file name is provided, the default name 'address_book_backup.json' is used.
+    """
+    if request.method == 'POST':
+        file_name = request.POST.get('file_name')
+
+        if file_name[-5:] != ".json" and len(file_name) != 0:
+            file_name = file_name + '.json'
+
+        elif len(file_name) == 0:
+            file_name = "address_book_backup.json"
+
+        contacts = Contact.objects.all()
+        json_data = serialize('json', contacts)
+
+        file_path = f'data/{file_name}' 
+        with open(file_path, 'w') as file:
+            file.write(json_data)
+
+    return render(request, 'addressBook/address_book_backup.html')
+
