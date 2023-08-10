@@ -105,3 +105,39 @@ def import_address_book(request):
             pass
 
     return render(request, 'addressBook/import_address_book.html')
+
+def update_contact(request, pk):
+    """
+    Handles requests to update the details of an existing contact.
+    Retrieves the contact from the database based on the provided primary key (pk),
+    processes the submitted form data if the request method is POST, and updates the contact details.
+    Displays a form with pre-filled data for the user to edit, allowing changes to phone numbers,
+    email addresses, and other contact information.
+    """
+    contact = Contact.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = ContactForm(request.POST, instance=contact)
+        if form.is_valid():
+            form.save()
+            return redirect('contact_list')
+    else:
+        form = ContactForm(instance=contact)
+    return render(request, 'addressbook/contact_update.html', {'form': form})
+
+def contact_search(request, query):
+    """
+    Handles requests to search for contacts based on user-specified criteria.
+    Retrieves contacts from the database that match the search criteria,
+    such as name, phone number, email address, or notes.
+    Displays a list of matching contacts  if no results are found.
+    # """
+    contacts_db = Contact.objects.all()
+    langht = len(contacts_db)
+    contacts = []
+    for index in range(0, langht):
+        elm = contacts_db[index]
+        if elm.name == query or elm.phone_number == query or elm.email == query or elm.notes == query:
+            contacts.append(elm)
+
+
+    return render(request, 'addressbook/contact_search_results.html', {'contacts': contacts, 'query': query})
