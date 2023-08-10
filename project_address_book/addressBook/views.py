@@ -16,6 +16,7 @@ def register_contact(request):
     """
     if request.method == 'POST':
         form = ContactForm(request.POST)
+        print(request.POST)
         if form.is_valid():
             form.save()
             return redirect('contact_list') 
@@ -54,7 +55,6 @@ def details_contact(request, pk):
     }
     return HttpResponse(template.render(context, request))
 
-<<<<<<< HEAD
 def save_address_book(request):
     """
     Handles the process of saving the address book data to a JSON file.
@@ -108,8 +108,6 @@ def import_address_book(request):
 
     return render(request, 'addressBook/import_address_book.html')
 
-=======
->>>>>>> origin/develop
 def update_contact(request, pk):
     """
     Handles requests to update the details of an existing contact.
