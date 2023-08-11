@@ -1,8 +1,0 @@
-addressBook/migrations/__pycache__/
-project_address_book/__pycache__/
-addressBook/__pycache__
-addressBook/admin.py
-addressBook/tests.py
-templates/.DS_Store
-.DS_Store
-db.sqlite3
