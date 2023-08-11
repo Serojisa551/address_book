@@ -7,6 +7,10 @@ from django.core.serializers import serialize
 import json
 from django.http import JsonResponse
 from django.db.utils import IntegrityError
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import AuthenticationForm
+
 
 
 def register_contact(request):
@@ -16,7 +20,11 @@ def register_contact(request):
     """
     if request.method == 'POST':
         form = ContactForm(request.POST)
-        print(request.POST)
+        phone_number = request.POST.get('phone_number') 
+        print(phone_number)
+        for elm in phone_number:
+            if 48 > ord(elm) or ord(elm) > 57:
+                return render(request, 'addressbook/contact_register.html')
         if form.is_valid():
             form.save()
             return redirect('contact_list') 
@@ -126,24 +134,21 @@ def update_contact(request, pk):
         form = ContactForm(instance=contact)
     return render(request, 'addressbook/contact_update.html', {'form': form})
 
-def contact_search(request, query):
+def contact_search(request):
     """
     Handles requests to search for contacts based on user-specified criteria.
     Retrieves contacts from the database that match the search criteria,
     such as name, phone number, email address, or notes.
     Displays a list of matching contacts  if no results are found.
-    # """
-    contacts_db = Contact.objects.all()
-    langht = len(contacts_db)
-    contacts = []
-    for index in range(0, langht):
-        elm = contacts_db[index]
-        if elm.name == query or elm.phone_number == query or elm.email == query or elm.notes == query:
-            contacts.append(elm)
-
-
-    return render(request, 'addressbook/contact_search_results.html', {'contacts': contacts, 'query': query})
-
-
-
-
+    """
+    if request.method == 'POST':
+        query = request.POST.get("query")
+        contacts_db = Contact.objects.all()
+        langht = len(contacts_db)
+        contacts = []
+        for index in range(0, langht):
+            elm = contacts_db[index]
+            if elm.name == query or elm.phone_number == query or elm.email == query or elm.notes == query:
+                contacts.append(elm)
+        return render(request, 'addressbook/contact_search_results.html', {'contacts': contacts, 'query': query})
+    return render(request, 'addressbook/contact_search_results.html')

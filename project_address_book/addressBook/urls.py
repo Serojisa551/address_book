@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import *
+from .file_handler import *
 
 urlpatterns = [
     path('register/', register_contact, name='register_contact'),
@@ -9,5 +9,5 @@ urlpatterns = [
     path('contact/backup/', save_address_book , name='save_address_book'),
     path('contact/import/', import_address_book , name='import_address_book'),
     path('contact/<int:pk>/update/', update_contact, name='update_contact'),
-    path('contact/<query>/search/', contact_search, name='search_contact'),
+    path('contact/search/', contact_search, name='search_contact'),
 ]
