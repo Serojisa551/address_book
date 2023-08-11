@@ -1,0 +1,11 @@
+{% extends 'addressBook/base.html' %}
+
+{% block content %}
+    <h1>{{contact.name}}</h1>
+    <p>Phone: {{contact.phone_number}}</p>
+    <p>Email: {{contact.email}}</p>
+    <p>Notes: {{contact.notes}}</p>
+    <p><a href="/contact/{{ contact.pk }}/update/">Update contact</a></p>
+    <p><a href="/contact/{{ contact.pk }}/delete/">Delete</a></p><br>
+    <p><a href="/">Go to main page</a></p>
+{% endblock %}

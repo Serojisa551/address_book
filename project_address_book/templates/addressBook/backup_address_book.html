@@ -1,0 +1,14 @@
+{% extends 'addressBook/base.html' %}
+
+{% block content %}
+<main>
+    <h3>Write the file name to make a backup</h3>
+    <form method="post">
+        {% csrf_token %}
+        <label for="id_file_name">File Name:</label>
+        <input type="text" name="file_name" id="id_file_name" value="backup.json">
+        <button type="submit">Backup</button>
+    </form>
+</main>
+<a href="{% url 'contact_list' %}">Back to Contact List</a>
+{% endblock %}

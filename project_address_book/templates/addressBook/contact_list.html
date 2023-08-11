@@ -1,0 +1,18 @@
+{% extends 'addressBook/base.html' %}
+
+{% block content %}
+<h2>Contact List</h2>
+<ul>
+    <form method="post" action="{% url 'search_contact' %}">
+        {% csrf_token %}
+        <input type="text" name="query" maxlength="100" required="" id="id_query" placeholder="Search contact">
+        <button>Search</button><br> 
+        <a href="{% url 'import_address_book' %}">Import backup </a> &nbsp
+        <a href="{% url 'save_address_book' %}">Make a backup</a> &nbsp
+        <a href="{% url 'register_contact' %}">Register contacts</a> &nbsp
+        {% for contact in contacts %}
+        <li> <a href=" contact/{{ contact.pk }}/details/">{{ contact.name }}</a></li>
+        {% endfor %}
+    </form>
+</ul>
+{% endblock %}
