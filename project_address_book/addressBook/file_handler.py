@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from django.template import loader
 from .forms import ContactForm
 from .models import Contact
@@ -7,21 +7,26 @@ from django.core.serializers import serialize
 import json
 from django.http import JsonResponse
 from django.db.utils import IntegrityError
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import AuthenticationForm
-
-
-
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db.models import QuerySet
+@login_required
 def register_contact(request):
     """
     Handles requests to register new contacts.
     Creates and saves a contact if the form is valid, otherwise displays an empty form.
     """
     if request.method == 'POST':
+        phone_number = request.POST.get('phone_number')
+        userPk = request.user.pk 
+       
+        request_copy = request.POST.copy()
+        print(type(request_copy))
+        request_copy["userId"] = userPk
+        request.POST = request_copy
         form = ContactForm(request.POST)
-        phone_number = request.POST.get('phone_number') 
-        print(phone_number)
         for elm in phone_number:
             if 48 > ord(elm) or ord(elm) > 57:
                 return render(request, 'addressbook/contact_register.html')
@@ -32,13 +37,27 @@ def register_contact(request):
         form = ContactForm()
     return render(request, 'addressbook/contact_register.html', {'form': form})
 
+@login_required
 def contact_list(request):
     """
     Displays a list of all contacts retrieved from the database.
     """
     contacts = Contact.objects.all()
+    
+    contacts_pk = []
+    userPk = request.user.username 
+   
+    for obj in contacts: 
+        print(obj, obj.userId, userPk)
+        userId = str(obj.userId)
+        if userPk == userId:
+            contacts_pk.append(obj.userId.pk)
+
+    contacts = Contact.objects.filter(userId__in=contacts_pk)
+    print(contacts)
     return render(request, 'addressbook/contact_list.html', {'contacts': contacts})
 
+@login_required
 def delete_contact(request, pk):
     """
     Deletes a contact based on the provided pk if the request is made using the POST method,
@@ -50,7 +69,7 @@ def delete_contact(request, pk):
         return redirect('contact_list')
     return render(request, 'addressbook/contact_delete.html', {'contact': contact})
 
-
+@login_required
 def details_contact(request, pk):
     """
     Displays the details of a specific contact based on the provided primary key (pk).
@@ -63,6 +82,7 @@ def details_contact(request, pk):
     }
     return HttpResponse(template.render(context, request))
 
+@login_required
 def save_address_book(request):
     """
     Handles the process of saving the address book data to a JSON file.
@@ -88,6 +108,7 @@ def save_address_book(request):
 
     return render(request, 'addressBook/backup_address_book.html')
 
+@login_required
 def import_address_book(request):
     """
     Handles the process of importing contact data from a JSON file into the database.
@@ -116,6 +137,7 @@ def import_address_book(request):
 
     return render(request, 'addressBook/import_address_book.html')
 
+@login_required
 def update_contact(request, pk):
     """
     Handles requests to update the details of an existing contact.
@@ -134,6 +156,7 @@ def update_contact(request, pk):
         form = ContactForm(instance=contact)
     return render(request, 'addressbook/contact_update.html', {'form': form})
 
+@login_required
 def contact_search(request):
     """
     Handles requests to search for contacts based on user-specified criteria.
@@ -152,3 +175,60 @@ def contact_search(request):
                 contacts.append(elm)
         return render(request, 'addressbook/contact_search_results.html', {'contacts': contacts, 'query': query})
     return render(request, 'addressbook/contact_search_results.html')
+
+def register_user(request):
+    """
+    This function handles user registration.
+    
+    If the request method is POST, it processes the registration form data.
+    If the form is valid, a new user is created and redirected to the contact list page.
+    
+    If the request method is not POST, the user registration form is displayed.
+    """
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('contact_list') 
+    else:
+        form = UserCreationForm()
+    return render(request, 'addressBook/register_users.html', {'form': form})
+
+def login_request(request):
+    """
+    This function handles user login.
+    
+    If the request method is POST, it processes the login form data.
+    If the form is valid and the provided credentials match a user, the user is logged in.
+    
+    If the request method is not POST or if the credentials are invalid, the login form is displayed.
+    """
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)  
+                return redirect("contact_list")
+            else:
+                messages.error(request, "Invalid username or password.") 
+    form = AuthenticationForm()
+    return render(request, "addressBook/login_users.html", {"login_form": form})
+
+
+def logout_request(request):
+    """
+    Logs out the currently logged-in user and redirects to the login page.
+    """
+    logout(request) 
+    return redirect('login_request') 
+
+def delete_all_contact(request):
+    """
+    Deletes all contacts from the address book and redirects to the contact list.
+    """
+    contacts = Contact.objects.all()
+    contacts.delete()
+    return redirect('contact_list')

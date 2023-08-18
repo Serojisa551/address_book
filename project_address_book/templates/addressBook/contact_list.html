@@ -10,6 +10,8 @@
         <a href="{% url 'import_address_book' %}">Import backup </a> &nbsp
         <a href="{% url 'save_address_book' %}">Make a backup</a> &nbsp
         <a href="{% url 'register_contact' %}">Register contacts</a> &nbsp
+        <a href="{% url 'logout_request' %}">Logout</a> &nbsp
+        <a href="{% url 'delete_all_contact' %}">delete_all_contact</a>
         {% for contact in contacts %}
         <li> <a href=" contact/{{ contact.pk }}/details/">{{ contact.name }}</a></li>
         {% endfor %}
