@@ -21,14 +21,12 @@ def register_contact(request):
     if request.method == 'POST':
         phone_number = request.POST.get('phone_number')
         userPk = request.user.pk 
-       
         request_copy = request.POST.copy()
-        print(type(request_copy))
         request_copy["userId"] = userPk
         request.POST = request_copy
         form = ContactForm(request.POST)
-        for elm in phone_number:
-            if 48 > ord(elm) or ord(elm) > 57:
+        for obj in phone_number:
+            if 48 > ord(obj) or ord(obj) > 57:
                 return render(request, 'addressbook/contact_register.html')
         if form.is_valid():
             form.save()
@@ -43,18 +41,13 @@ def contact_list(request):
     Displays a list of all contacts retrieved from the database.
     """
     contacts = Contact.objects.all()
-    
     contacts_pk = []
     userPk = request.user.username 
-   
     for obj in contacts: 
-        print(obj, obj.userId, userPk)
         userId = str(obj.userId)
         if userPk == userId:
             contacts_pk.append(obj.userId.pk)
-
     contacts = Contact.objects.filter(userId__in=contacts_pk)
-    print(contacts)
     return render(request, 'addressbook/contact_list.html', {'contacts': contacts})
 
 @login_required
@@ -64,9 +57,13 @@ def delete_contact(request, pk):
     otherwise displays a confirmation page for contact deletion.
     """
     contact = get_object_or_404(Contact, pk=pk)
+    userPk = request.user.username
+    userId = contact.userId
     if request.method == 'POST':
-        contact.delete()
-        return redirect('contact_list')
+        if userPk == userId:
+            print("userPk  userId", userPk, userId)
+            contact.delete()
+            return redirect('contact_list')
     return render(request, 'addressbook/contact_delete.html', {'contact': contact})
 
 @login_required
@@ -88,7 +85,7 @@ def save_address_book(request):
     Handles the process of saving the address book data to a JSON file.
     Retrieves contact data from the database, serializes it to JSON format,
     and saves it to a user-specified or default file in the 'data' directory.
-    If no file name is provided, the default name 'address_book_backup.json' is used.
+    If no file name is provided, the default name 'backup.json' is used.
     """
     if request.method == 'POST':
         file_name = request.POST.get('file_name')
@@ -97,9 +94,16 @@ def save_address_book(request):
             file_name = file_name + '.json'
 
         elif len(file_name) == 0:
-            file_name = "address_book_backup.json"
+            file_name = "backup.json"
 
         contacts = Contact.objects.all()
+        contacts_pk = []
+        userPk = request.user.username 
+        for obj in contacts: 
+            userId = str(obj.userId)
+            if userPk == userId:
+                contacts_pk.append(obj.userId.pk)
+        contacts = Contact.objects.filter(userId__in=contacts_pk)
         json_data = serialize('json', contacts)
 
         file_path = f'data/{file_name}' 
@@ -134,7 +138,7 @@ def import_address_book(request):
                         pass
         except FileNotFoundError:
             pass
-
+        return redirect('contact_list')
     return render(request, 'addressBook/import_address_book.html')
 
 @login_required
@@ -147,11 +151,14 @@ def update_contact(request, pk):
     email addresses, and other contact information.
     """
     contact = Contact.objects.get(pk=pk)
+    userPk = request.user.username
+    userId = contact.userId
     if request.method == 'POST':
         form = ContactForm(request.POST, instance=contact)
-        if form.is_valid():
-            form.save()
-            return redirect('contact_list')
+        if userPk == userId:
+            if form.is_valid():
+                form.save()
+                return redirect('contact_list')
     else:
         form = ContactForm(instance=contact)
     return render(request, 'addressbook/contact_update.html', {'form': form})
@@ -169,10 +176,12 @@ def contact_search(request):
         contacts_db = Contact.objects.all()
         langht = len(contacts_db)
         contacts = []
+        userPk = request.user.username
         for index in range(0, langht):
-            elm = contacts_db[index]
-            if elm.name == query or elm.phone_number == query or elm.email == query or elm.notes == query:
-                contacts.append(elm)
+            obj = contacts_db[index]
+            userId = obj.userId
+            if userPk == userId and obj.name == query or obj.phone_number == query or obj.email == query or obj.notes == query:
+                contacts.append(obj)
         return render(request, 'addressbook/contact_search_results.html', {'contacts': contacts, 'query': query})
     return render(request, 'addressbook/contact_search_results.html')
 
@@ -225,6 +234,7 @@ def logout_request(request):
     logout(request) 
     return redirect('login_request') 
 
+@login_required    
 def delete_all_contact(request):
     """
     Deletes all contacts from the address book and redirects to the contact list.
